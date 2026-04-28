@@ -27,7 +27,24 @@ def get_profile(request, user_id=None):
         return Response({'message': 'User not found'}, status=404)
 
 
-@api_view(['PUT'])
+@api_view(['GET', 'PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def profile_view(request):
+    """Handles GET and PUT on /api/users/profile"""
+    if request.method == 'GET':
+        user = request.user
+        employer = None
+        if user.role == 'employer':
+            employer = Employer.objects.filter(user=user).first()
+        return Response({
+            'user': UserSerializer(user).data,
+            'employer': EmployerSerializer(employer).data if employer else None,
+        })
+    return update_profile(request)
+
+
+@api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def update_profile(request):
@@ -62,7 +79,9 @@ def update_profile(request):
     employer_data = {k: data.pop(k) for k in employer_fields if k in data}
 
     # Remove immutable fields
-    for f in ('password', 'role', 'id', 'created_at', 'updated_at'):
+    for f in ('password', 'role', 'id', 'created_at', 'updated_at',
+              'createdAt', 'updatedAt', 'isSuperuser', 'is_superuser',
+              'isStaff', 'is_staff', 'isActive', 'isApproved', 'approvalStatus'):
         data.pop(f, None)
 
     # Update user
