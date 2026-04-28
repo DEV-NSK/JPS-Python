@@ -2,7 +2,7 @@ services:
   - type: web
     name: jps-python-api
     env: python
-    buildCommand: "./build.sh"
+    buildCommand: "chmod +x build.sh && ./build.sh"
     startCommand: "gunicorn django_backend.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: DEBUG
