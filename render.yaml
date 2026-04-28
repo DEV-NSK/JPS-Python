@@ -2,8 +2,8 @@ services:
   - type: web
     name: jps-python-api
     env: python
-    buildCommand: "pip install -r django_backend/requirements.txt && python django_backend/manage.py collectstatic --no-input && python django_backend/manage.py migrate"
-    startCommand: "gunicorn --chdir django_backend django_backend.wsgi:application --bind 0.0.0.0:$PORT"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate"
+    startCommand: "gunicorn django_backend.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: DEBUG
         value: False
