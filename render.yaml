@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: jps-python-api
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn django_backend.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://your-vercel-app.vercel.app"
+      - key: DB_NAME
+        fromDatabase:
+          name: jps-python-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: jps-python-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: jps-python-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: jps-python-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: jps-python-db
+          property: port
+
+databases:
+  - name: jps-python-db
+    databaseName: job_portal
+    user: postgres
