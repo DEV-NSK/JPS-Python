@@ -78,15 +78,27 @@ def update_profile(request):
     ]
     employer_data = {k: data.pop(k) for k in employer_fields if k in data}
 
-    # Remove immutable fields
-    for f in ('password', 'role', 'id', 'created_at', 'updated_at',
-              'createdAt', 'updatedAt', 'isSuperuser', 'is_superuser',
-              'isStaff', 'is_staff', 'isActive', 'isApproved', 'approvalStatus'):
-        data.pop(f, None)
+    # Remove immutable fields and non-user fields
+    BLOCKED = {
+        'password', 'role', 'id', '_id', 'created_at', 'updated_at',
+        'createdAt', 'updatedAt', 'isSuperuser', 'is_superuser',
+        'isStaff', 'is_staff', 'isActive', 'is_active', 'isApproved',
+        'is_approved', 'approvalStatus', 'approval_status',
+        'lastLogin', 'last_login', 'email',
+        'groups', 'user_permissions',
+        # Reverse relations — never set these
+        'logentry', 'employer_profile', 'jobs', 'bookmarks', 'applications',
+        'posts', 'liked_posts', 'comments', 'notifications',
+    }
+    for f in list(data.keys()):
+        if f in BLOCKED:
+            data.pop(f, None)
 
-    # Update user
+    # Only update simple model fields (not relations or reverse accessors)
+    SIMPLE_FIELDS = {'name', 'bio', 'location', 'phone', 'linkedin', 'github',
+                     'avatar', 'resume', 'skills', 'experience', 'education'}
     for attr, value in data.items():
-        if hasattr(user, attr):
+        if attr in SIMPLE_FIELDS:
             setattr(user, attr, value)
     user.save()
 
