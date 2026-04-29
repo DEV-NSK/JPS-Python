@@ -8,9 +8,12 @@ from accounts.models import User
 from accounts.permissions import IsAdmin
 
 
-@api_view(['GET'])
+@api_view(['GET', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def get_notifications(request):
+    if request.method == 'DELETE':
+        Notification.objects.filter(recipient=request.user).delete()
+        return Response({'success': True})
     notifs = Notification.objects.filter(recipient=request.user)[:50]
     return Response(NotificationSerializer(notifs, many=True).data)
 
